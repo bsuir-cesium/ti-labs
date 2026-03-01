@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лабораторная работа №2 — Шифрование</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0f0f1a;
+            color: #e0e0e0;
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 30px 20px;
+        }
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 1.6em;
+            color: #a0c4ff;
+        }
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 0;
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px 20px;
+            border: none;
+            background: #1a1a2e;
+            color: #888;
+            font-size: 0.95em;
+            cursor: pointer;
+            border-radius: 8px 8px 0 0;
+            transition: all 0.2s;
+        }
+        .tab-btn.active {
+            background: #1e1e36;
+            color: #a0c4ff;
+            font-weight: 600;
+        }
+        .tab-btn:hover { color: #ccc; }
+        .tab-content {
+            display: none;
+            background: #1e1e36;
+            padding: 30px;
+            border-radius: 0 0 12px 12px;
+        }
+        .tab-content.active { display: block; }
+        label {
+            display: block;
+            margin-bottom: 6px;
+            font-weight: 500;
+            color: #a0c4ff;
+            font-size: 0.9em;
+        }
+        input[type="text"], textarea {
+            width: 100%;
+            padding: 10px 14px;
+            border: 1px solid #333;
+            border-radius: 6px;
+            background: #12121e;
+            color: #e0e0e0;
+            font-size: 0.95em;
+            font-family: 'Consolas', 'Courier New', monospace;
+            margin-bottom: 16px;
+            resize: vertical;
+        }
+        input[type="text"]:focus, textarea:focus {
+            outline: none;
+            border-color: #a0c4ff;
+        }
+        textarea { min-height: 100px; }
+        .btn-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        button {
+            padding: 10px 22px;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.9em;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 500;
+        }
+        .btn-encrypt {
+            background: #2d6a4f;
+            color: #fff;
+        }
+        .btn-encrypt:hover { background: #40916c; }
+        .btn-decrypt {
+            background: #6a2d4f;
+            color: #fff;
+        }
+        .btn-decrypt:hover { background: #91406c; }
+        .btn-file {
+            background: #2d4f6a;
+            color: #fff;
+        }
+        .btn-file:hover { background: #406a91; }
+        .btn-save {
+            background: #4f6a2d;
+            color: #fff;
+        }
+        .btn-save:hover { background: #6a9140; }
+        .btn-clear {
+            background: #444;
+            color: #ccc;
+        }
+        .btn-clear:hover { background: #555; }
+        .result-box {
+            background: #12121e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 14px;
+            min-height: 60px;
+            font-family: 'Consolas', 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-all;
+            font-size: 0.95em;
+            color: #c0ffc0;
+            margin-bottom: 16px;
+        }
+        .table-viz {
+            background: #12121e;
+            border: 1px solid #333;
+            border-radius: 6px;
+            padding: 14px;
+            margin-bottom: 16px;
+            overflow-x: auto;
+        }
+        .table-viz table {
+            border-collapse: collapse;
+            font-family: 'Consolas', monospace;
+        }
+        .table-viz td, .table-viz th {
+            border: 1px solid #333;
+            padding: 6px 12px;
+            text-align: center;
+            min-width: 36px;
+        }
+        .table-viz th {
+            background: #2a2a4a;
+            color: #a0c4ff;
+        }
+        .table-viz .rank-row td {
+            background: #1a1a30;
+            color: #888;
+            font-size: 0.85em;
+        }
+        .table-viz .empty-cell {
+            background: #0a0a15;
+            color: #333;
+        }
+        .info {
+            font-size: 0.85em;
+            color: #888;
+            margin-bottom: 16px;
+            line-height: 1.5;
+        }
+        .hidden-input { display: none; }
+        .file-section {
+            border-top: 1px solid #333;
+            padding-top: 16px;
+            margin-top: 8px;
+        }
+        .error { color: #ff6b6b; font-size: 0.9em; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Шифрование и дешифрование текста</h1>
+
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('columnar')">Столбцовый улучшенный (EN)</button>
+            <button class="tab-btn" onclick="switchTab('vigenere')">Виженер — автоключ (RU)</button>
+        </div>
+
+        <!-- Столбцовый метод -->
+        <div id="tab-columnar" class="tab-content active">
+            <div class="info">
+                Улучшенный столбцовый метод перестановок. Ключ — слово из английских букв.
+                Строки таблицы имеют переменную длину: строка i заполняется до столбца с номером i.
+                Шифруются только английские буквы (A-Z), остальные символы игнорируются.
+            </div>
+
+            <label for="col-key">Ключ (английские буквы):</label>
+            <input type="text" id="col-key" placeholder="Например: Yarmolik">
+
+            <label for="col-input">Текст:</label>
+            <textarea id="col-input" placeholder="Введите текст на английском языке..."></textarea>
+
+            <div class="btn-row">
+                <button class="btn-encrypt" onclick="columnarEncrypt()">Зашифровать</button>
+                <button class="btn-decrypt" onclick="columnarDecrypt()">Расшифровать</button>
+                <button class="btn-file" onclick="document.getElementById('col-file').click()">Загрузить файл</button>
+                <button class="btn-save" onclick="saveResult('col')">Сохранить результат</button>
+                <button class="btn-clear" onclick="clearAll('col')">Очистить</button>
+                <input type="file" id="col-file" class="hidden-input" accept=".txt" onchange="loadFile(this, 'col-input')">
+            </div>
+
+            <div id="col-error" class="error"></div>
+
+            <label>Результат:</label>
+            <div id="col-result" class="result-box"></div>
+
+            <label>Таблица шифрования:</label>
+            <div id="col-table" class="table-viz"></div>
+        </div>
+
+        <!-- Виженер -->
+        <div id="tab-vigenere" class="tab-content">
+            <div class="info">
+                Шифр Виженера с самогенерирующимся ключом (автоключ по открытому тексту).
+                Ключ — слово из русских букв. Алфавит: А-Я (32 буквы, без Ё, с Й).
+                Шифруются только русские буквы, Ё заменяется на Е, остальные символы игнорируются.
+            </div>
+
+            <label for="vig-key">Ключ (русские буквы):</label>
+            <input type="text" id="vig-key" placeholder="Например: КЛЮЧ">
+
+            <label for="vig-input">Текст:</label>
+            <textarea id="vig-input" placeholder="Введите текст на русском языке..."></textarea>
+
+            <div class="btn-row">
+                <button class="btn-encrypt" onclick="vigenereEncrypt()">Зашифровать</button>
+                <button class="btn-decrypt" onclick="vigenereDecrypt()">Расшифровать</button>
+                <button class="btn-file" onclick="document.getElementById('vig-file').click()">Загрузить файл</button>
+                <button class="btn-save" onclick="saveResult('vig')">Сохранить результат</button>
+                <button class="btn-clear" onclick="clearAll('vig')">Очистить</button>
+                <input type="file" id="vig-file" class="hidden-input" accept=".txt" onchange="loadFile(this, 'vig-input')">
+            </div>
+
+            <div id="vig-error" class="error"></div>
+
+            <label>Результат:</label>
+            <div id="vig-result" class="result-box"></div>
+
+            <label>Детали шифрования:</label>
+            <div id="vig-table" class="table-viz"></div>
+        </div>
+    </div>
+
+    <script>
+        // ==================== Общие функции ====================
+
+        function switchTab(tab) {
+            document.querySelectorAll('.tab-btn').forEach((btn, i) => {
+                btn.classList.toggle('active', (tab === 'columnar' ? i === 0 : i === 1));
+            });
+            document.getElementById('tab-columnar').classList.toggle('active', tab === 'columnar');
+            document.getElementById('tab-vigenere').classList.toggle('active', tab === 'vigenere');
+        }
+
+        function loadFile(input, targetId) {
+            const file = input.files[0];
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                document.getElementById(targetId).value = e.target.result;
+            };
+            reader.readAsText(file, 'UTF-8');
+            input.value = '';
+        }
+
+        function saveResult(prefix) {
+            const text = document.getElementById(prefix + '-result').textContent;
+            if (!text) return;
+            const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'result.txt';
+            a.click();
+            URL.revokeObjectURL(a.href);
+        }
+
+        function clearAll(prefix) {
+            document.getElementById(prefix + '-key').value = '';
+            document.getElementById(prefix + '-input').value = '';
+            document.getElementById(prefix + '-result').textContent = '';
+            document.getElementById(prefix + '-table').innerHTML = '';
+            document.getElementById(prefix + '-error').textContent = '';
+        }
+
+        // ==================== Столбцовый улучшенный ====================
+
+        function getColumnRanks(key) {
+            const letters = key.toUpperCase().split('');
+            const indexed = letters.map((ch, i) => ({ ch, i }));
+            indexed.sort((a, b) => a.ch < b.ch ? -1 : a.ch > b.ch ? 1 : a.i - b.i);
+            const ranks = new Array(key.length);
+            indexed.forEach((item, rank) => {
+                ranks[item.i] = rank + 1;
+            });
+            return ranks;
+        }
+
+        function buildColumnarTable(text, key) {
+            const ranks = getColumnRanks(key);
+            const numCols = key.length;
+
+            // rankToPos: rank -> physical column index
+            const rankToPos = {};
+            ranks.forEach((rank, pos) => { rankToPos[rank] = pos; });
+
+            const rows = [];
+            let idx = 0;
+            let rowNum = 1;
+
+            while (idx < text.length) {
+                const currentRank = ((rowNum - 1) % numCols) + 1;
+                const fillUpToPos = rankToPos[currentRank];
+                const rowLength = Math.min(fillUpToPos + 1, text.length - idx);
+                const row = text.slice(idx, idx + rowLength).split('');
+                rows.push(row);
+                idx += rowLength;
+                rowNum++;
+            }
+
+            return { ranks, rows, rankToPos, numCols };
+        }
+
+        function columnarEncrypt() {
+            const keyRaw = document.getElementById('col-key').value.trim();
+            const inputText = document.getElementById('col-input').value;
+
+            const key = keyRaw.toUpperCase().replace(/[^A-Z]/g, '');
+            if (key.length < 2) {
+                document.getElementById('col-error').textContent = 'Ключ должен содержать минимум 2 английские буквы.';
+                return;
+            }
+            document.getElementById('col-error').textContent = '';
+
+            const text = inputText.toUpperCase().replace(/[^A-Z]/g, '');
+            if (!text) {
+                document.getElementById('col-error').textContent = 'Текст не содержит английских букв.';
+                return;
+            }
+
+            const { ranks, rows, rankToPos, numCols } = buildColumnarTable(text, key);
+
+            // Read columns in rank order
+            let result = '';
+            for (let rank = 1; rank <= numCols; rank++) {
+                const pos = rankToPos[rank];
+                for (const row of rows) {
+                    if (pos < row.length) {
+                        result += row[pos];
+                    }
+                }
+            }
+
+            document.getElementById('col-result').textContent = result;
+            renderColumnarTable(key, ranks, rows, numCols);
+        }
+
+        function columnarDecrypt() {
+            const keyRaw = document.getElementById('col-key').value.trim();
+            const inputText = document.getElementById('col-input').value;
+
+            const key = keyRaw.toUpperCase().replace(/[^A-Z]/g, '');
+            if (key.length < 2) {
+                document.getElementById('col-error').textContent = 'Ключ должен содержать минимум 2 английские буквы.';
+                return;
+            }
+            document.getElementById('col-error').textContent = '';
+
+            const text = inputText.toUpperCase().replace(/[^A-Z]/g, '');
+            if (!text) {
+                document.getElementById('col-error').textContent = 'Текст не содержит английских букв.';
+                return;
+            }
+
+            const ranks = getColumnRanks(key);
+            const numCols = key.length;
+            const rankToPos = {};
+            ranks.forEach((rank, pos) => { rankToPos[rank] = pos; });
+
+            // Reconstruct row lengths
+            const rowLengths = [];
+            let remaining = text.length;
+            let rowNum = 1;
+            while (remaining > 0) {
+                const currentRank = ((rowNum - 1) % numCols) + 1;
+                const fillUpToPos = rankToPos[currentRank];
+                const rowLength = Math.min(fillUpToPos + 1, remaining);
+                rowLengths.push(rowLength);
+                remaining -= rowLength;
+                rowNum++;
+            }
+
+            // Count characters per column
+            const colCounts = new Array(numCols).fill(0);
+            for (const len of rowLengths) {
+                for (let c = 0; c < len; c++) {
+                    colCounts[c]++;
+                }
+            }
+
+            // Fill columns in rank order from ciphertext
+            const columns = new Array(numCols).fill(null).map(() => []);
+            let charIdx = 0;
+            for (let rank = 1; rank <= numCols; rank++) {
+                const pos = rankToPos[rank];
+                for (let i = 0; i < colCounts[pos]; i++) {
+                    columns[pos].push(text[charIdx++]);
+                }
+            }
+
+            // Read row by row
+            const rows = [];
+            const colIndices = new Array(numCols).fill(0);
+            let result = '';
+            for (const len of rowLengths) {
+                const row = [];
+                for (let c = 0; c < len; c++) {
+                    const ch = columns[c][colIndices[c]++];
+                    row.push(ch);
+                    result += ch;
+                }
+                rows.push(row);
+            }
+
+            document.getElementById('col-result').textContent = result;
+            renderColumnarTable(key, ranks, rows, numCols);
+        }
+
+        function renderColumnarTable(key, ranks, rows, numCols) {
+            const keyArr = key.toUpperCase().split('');
+            let html = '<table>';
+
+            // Key row
+            html += '<tr>';
+            for (let i = 0; i < numCols; i++) {
+                html += `<th>${keyArr[i]}</th>`;
+            }
+            html += '</tr>';
+
+            // Rank row
+            html += '<tr class="rank-row">';
+            for (let i = 0; i < numCols; i++) {
+                html += `<td>${ranks[i]}</td>`;
+            }
+            html += '</tr>';
+
+            // Data rows
+            for (const row of rows) {
+                html += '<tr>';
+                for (let c = 0; c < numCols; c++) {
+                    if (c < row.length) {
+                        html += `<td>${row[c]}</td>`;
+                    } else {
+                        html += '<td class="empty-cell"></td>';
+                    }
+                }
+                html += '</tr>';
+            }
+
+            html += '</table>';
+            document.getElementById('col-table').innerHTML = html;
+        }
+
+        // ==================== Виженер с автоключом ====================
+
+        const RU_ALPHA = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+
+        function filterRussian(text) {
+            return text.toUpperCase().replace(/Ё/g, 'Е').split('').filter(ch => RU_ALPHA.includes(ch)).join('');
+        }
+
+        function vigenereEncrypt() {
+            const keyRaw = document.getElementById('vig-key').value.trim();
+            const inputText = document.getElementById('vig-input').value;
+
+            const keyFiltered = filterRussian(keyRaw);
+            if (keyFiltered.length < 1) {
+                document.getElementById('vig-error').textContent = 'Ключ должен содержать хотя бы одну русскую букву.';
+                return;
+            }
+            document.getElementById('vig-error').textContent = '';
+
+            const text = filterRussian(inputText);
+            if (!text) {
+                document.getElementById('vig-error').textContent = 'Текст не содержит русских букв.';
+                return;
+            }
+
+            const keyChars = keyFiltered.split('');
+            let result = '';
+            const details = [];
+
+            for (let i = 0; i < text.length; i++) {
+                let k;
+                if (i < keyChars.length) {
+                    k = keyChars[i];
+                } else {
+                    k = text[i - keyChars.length];
+                }
+                const pIdx = RU_ALPHA.indexOf(text[i]);
+                const kIdx = RU_ALPHA.indexOf(k);
+                const cIdx = (pIdx + kIdx) % 32;
+                result += RU_ALPHA[cIdx];
+
+                if (i < 30) {
+                    details.push({ p: text[i], k: k, c: RU_ALPHA[cIdx], pIdx, kIdx, cIdx });
+                }
+            }
+
+            document.getElementById('vig-result').textContent = result;
+            renderVigenereDetails(details, text.length);
+        }
+
+        function vigenereDecrypt() {
+            const keyRaw = document.getElementById('vig-key').value.trim();
+            const inputText = document.getElementById('vig-input').value;
+
+            const keyFiltered = filterRussian(keyRaw);
+            if (keyFiltered.length < 1) {
+                document.getElementById('vig-error').textContent = 'Ключ должен содержать хотя бы одну русскую букву.';
+                return;
+            }
+            document.getElementById('vig-error').textContent = '';
+
+            const cipher = filterRussian(inputText);
+            if (!cipher) {
+                document.getElementById('vig-error').textContent = 'Текст не содержит русских букв.';
+                return;
+            }
+
+            const keyChars = keyFiltered.split('');
+            let result = '';
+            const details = [];
+
+            for (let i = 0; i < cipher.length; i++) {
+                let k;
+                if (i < keyChars.length) {
+                    k = keyChars[i];
+                } else {
+                    k = result[i - keyChars.length];
+                }
+                const cIdx = RU_ALPHA.indexOf(cipher[i]);
+                const kIdx = RU_ALPHA.indexOf(k);
+                const pIdx = (cIdx - kIdx + 32) % 32;
+                result += RU_ALPHA[pIdx];
+
+                if (i < 30) {
+                    details.push({ p: RU_ALPHA[pIdx], k: k, c: cipher[i], pIdx, kIdx, cIdx });
+                }
+            }
+
+            document.getElementById('vig-result').textContent = result;
+            renderVigenereDetails(details, cipher.length);
+        }
+
+        function renderVigenereDetails(details, totalLen) {
+            if (!details.length) {
+                document.getElementById('vig-table').innerHTML = '';
+                return;
+            }
+
+            let html = '<table>';
+            html += '<tr><th></th>';
+            for (let i = 0; i < details.length; i++) html += `<th>${i + 1}</th>`;
+            html += '</tr>';
+
+            html += '<tr><td style="text-align:right;color:#a0c4ff;padding-right:10px"><b>Откр.</b></td>';
+            for (const d of details) html += `<td>${d.p} <span style="color:#666;font-size:0.8em">(${d.pIdx})</span></td>`;
+            html += '</tr>';
+
+            html += '<tr><td style="text-align:right;color:#a0c4ff;padding-right:10px"><b>Ключ</b></td>';
+            for (const d of details) html += `<td>${d.k} <span style="color:#666;font-size:0.8em">(${d.kIdx})</span></td>`;
+            html += '</tr>';
+
+            html += '<tr><td style="text-align:right;color:#a0c4ff;padding-right:10px"><b>Шифр</b></td>';
+            for (const d of details) html += `<td style="color:#c0ffc0">${d.c} <span style="color:#666;font-size:0.8em">(${d.cIdx})</span></td>`;
+            html += '</tr>';
+
+            html += '</table>';
+
+            if (totalLen > 30) {
+                html += `<p style="color:#888;margin-top:8px;font-size:0.85em">Показаны первые 30 символов из ${totalLen}.</p>`;
+            }
+
+            document.getElementById('vig-table').innerHTML = html;
+        }
+    </script>
+</body>
+</html>
