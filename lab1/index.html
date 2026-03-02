@@ -220,8 +220,8 @@
         <div id="tab-vigenere" class="tab-content">
             <div class="info">
                 Шифр Виженера с самогенерирующимся ключом (автоключ по открытому тексту).
-                Ключ — слово из русских букв. Алфавит: А-Я (32 буквы, без Ё, с Й).
-                Шифруются только русские буквы, Ё заменяется на Е, остальные символы игнорируются.
+                Ключ — слово из русских букв. Алфавит: А-Я (33 буквы, с Ё и Й). Индексация с 1.
+                Шифруются только русские буквы, остальные символы игнорируются.
             </div>
 
             <label for="vig-key">Ключ (русские буквы):</label>
@@ -470,10 +470,14 @@
 
         // ==================== Виженер с автоключом ====================
 
-        const RU_ALPHA = 'АБВГДЕЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ';
+        const RU_ALPHA = 'АБВГДЕЁЖЗИЙКЛМНОПРСТУФХЦЧШЩЪЫЬЭЮЯ'; // 33 буквы, с Ё
+        const ALPHA_SIZE = RU_ALPHA.length; // 33
 
         function filterRussian(text) {
-            return text.toUpperCase().replace(/Ё/g, 'Е').split('').filter(ch => RU_ALPHA.includes(ch)).join('');
+            return text.toUpperCase()
+                .replace(/[\u00CB\u00EB]/g, 'Ё')  // macOS латинская Ë/ë → кириллическая Ё
+                .replace(/\u0415\u0308/g, 'Ё')     // NFD: Е+диакритика → Ё
+                .split('').filter(ch => RU_ALPHA.includes(ch)).join('');
         }
 
         function vigenereEncrypt() {
@@ -504,13 +508,13 @@
                 } else {
                     k = text[i - keyChars.length];
                 }
-                const pIdx = RU_ALPHA.indexOf(text[i]);
-                const kIdx = RU_ALPHA.indexOf(k);
-                const cIdx = (pIdx + kIdx) % 32;
-                result += RU_ALPHA[cIdx];
+                const pIdx = RU_ALPHA.indexOf(text[i]) + 1; // 1-based
+                const kIdx = RU_ALPHA.indexOf(k) + 1;
+                const cIdx = ((pIdx + kIdx - 2) % ALPHA_SIZE) + 1;
+                result += RU_ALPHA[cIdx - 1];
 
                 if (i < 30) {
-                    details.push({ p: text[i], k: k, c: RU_ALPHA[cIdx], pIdx, kIdx, cIdx });
+                    details.push({ p: text[i], k: k, c: RU_ALPHA[cIdx - 1], pIdx, kIdx, cIdx });
                 }
             }
 
@@ -546,13 +550,13 @@
                 } else {
                     k = result[i - keyChars.length];
                 }
-                const cIdx = RU_ALPHA.indexOf(cipher[i]);
-                const kIdx = RU_ALPHA.indexOf(k);
-                const pIdx = (cIdx - kIdx + 32) % 32;
-                result += RU_ALPHA[pIdx];
+                const cIdx = RU_ALPHA.indexOf(cipher[i]) + 1; // 1-based
+                const kIdx = RU_ALPHA.indexOf(k) + 1;
+                const pIdx = ((cIdx - kIdx + ALPHA_SIZE) % ALPHA_SIZE) + 1;
+                result += RU_ALPHA[pIdx - 1];
 
                 if (i < 30) {
-                    details.push({ p: RU_ALPHA[pIdx], k: k, c: cipher[i], pIdx, kIdx, cIdx });
+                    details.push({ p: RU_ALPHA[pIdx - 1], k: k, c: cipher[i], pIdx, kIdx, cIdx });
                 }
             }
 
