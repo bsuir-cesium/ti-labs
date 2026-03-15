@@ -27,7 +27,7 @@ class LFSR {
         return outputBit;
     }
 
-    generateKeystream(bitLength, maxHistory = 50) {
+    generateKeystream(bitLength, maxHistory = 60) {
         this.history = [];
         const keyBits = new Uint8Array(bitLength);
 

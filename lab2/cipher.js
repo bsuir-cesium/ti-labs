@@ -6,7 +6,7 @@ function streamCipher(data, initialStateStr) {
 
     const inputBytes = new Uint8Array(data);
     const totalBits = inputBytes.length * 8;
-    const keyBits = lfsr.generateKeystream(totalBits, 50);
+    const keyBits = lfsr.generateKeystream(totalBits, 60);
 
     const outputBytes = new Uint8Array(inputBytes.length);
     for (let byteIdx = 0; byteIdx < inputBytes.length; byteIdx++) {
