@@ -1,0 +1,287 @@
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    min-height: 100vh;
+    padding: 20px;
+}
+
+h1 {
+    text-align: center;
+    color: #e94560;
+    margin-bottom: 8px;
+    font-size: 1.6em;
+}
+
+.subtitle {
+    text-align: center;
+    color: #888;
+    margin-bottom: 24px;
+    font-size: 0.9em;
+}
+
+.container {
+    max-width: 1100px;
+    margin: 0 auto;
+}
+
+/* Панель управления */
+.controls {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 24px;
+    margin-bottom: 20px;
+    border: 1px solid #0f3460;
+}
+
+.control-row {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 16px;
+    flex-wrap: wrap;
+}
+
+.control-row:last-child {
+    margin-bottom: 0;
+}
+
+label {
+    font-weight: 600;
+    min-width: 180px;
+    color: #a0a0c0;
+}
+
+input[type="text"] {
+    flex: 1;
+    padding: 10px 14px;
+    border: 1px solid #0f3460;
+    border-radius: 8px;
+    background: #1a1a2e;
+    color: #e0e0e0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    letter-spacing: 2px;
+}
+
+input[type="text"]:focus {
+    outline: none;
+    border-color: #e94560;
+    box-shadow: 0 0 8px rgba(233, 69, 96, 0.3);
+}
+
+input[type="file"] {
+    display: none;
+}
+
+.file-label {
+    display: inline-block;
+    padding: 10px 20px;
+    background: #0f3460;
+    color: #e0e0e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background 0.2s;
+}
+
+.file-label:hover {
+    background: #1a4a8a;
+}
+
+.file-info {
+    color: #888;
+    font-size: 0.9em;
+}
+
+.btn-group {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+button {
+    padding: 10px 24px;
+    border: none;
+    border-radius: 8px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+button:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+}
+
+.btn-encrypt {
+    background: #e94560;
+    color: #fff;
+}
+.btn-encrypt:hover:not(:disabled) {
+    background: #ff6b81;
+}
+
+.btn-decrypt {
+    background: #0f3460;
+    color: #e0e0e0;
+}
+.btn-decrypt:hover:not(:disabled) {
+    background: #1a4a8a;
+}
+
+.btn-download {
+    background: #1b8a5a;
+    color: #fff;
+}
+.btn-download:hover:not(:disabled) {
+    background: #22b573;
+}
+
+.btn-csv {
+    background: #6c5ce7;
+    color: #fff;
+}
+.btn-csv:hover:not(:disabled) {
+    background: #8677ed;
+}
+
+/* Панели отображения */
+.panels {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 20px;
+}
+
+.panel {
+    background: #16213e;
+    border-radius: 12px;
+    padding: 16px;
+    border: 1px solid #0f3460;
+}
+
+.panel.full-width {
+    grid-column: 1 / -1;
+}
+
+.panel h3 {
+    color: #e94560;
+    margin-bottom: 12px;
+    font-size: 1em;
+    border-bottom: 1px solid #0f3460;
+    padding-bottom: 8px;
+}
+
+.binary-view {
+    font-family: 'Courier New', monospace;
+    font-size: 12px;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 300px;
+    overflow-y: auto;
+    color: #7fdbca;
+    background: #0d1b2a;
+    padding: 12px;
+    border-radius: 8px;
+}
+
+.binary-view:empty::before {
+    content: 'Нет данных';
+    color: #555;
+}
+
+/* Статус */
+.status {
+    text-align: center;
+    padding: 12px;
+    margin-bottom: 16px;
+    border-radius: 8px;
+    display: none;
+}
+
+.status.success {
+    display: block;
+    background: rgba(27, 138, 90, 0.2);
+    border: 1px solid #1b8a5a;
+    color: #22b573;
+}
+
+.status.error {
+    display: block;
+    background: rgba(233, 69, 96, 0.2);
+    border: 1px solid #e94560;
+    color: #ff6b81;
+}
+
+/* Валидация */
+.state-counter {
+    color: #888;
+    font-size: 0.85em;
+    min-width: 60px;
+    text-align: right;
+}
+
+.state-counter.valid {
+    color: #1b8a5a;
+}
+
+.state-counter.invalid {
+    color: #e94560;
+}
+
+/* Скроллбар */
+.binary-view::-webkit-scrollbar {
+    width: 6px;
+}
+.binary-view::-webkit-scrollbar-track {
+    background: #0d1b2a;
+}
+.binary-view::-webkit-scrollbar-thumb {
+    background: #0f3460;
+    border-radius: 3px;
+}
+
+/* Таблица регистра */
+.register-table-wrap {
+    max-height: 400px;
+    overflow: auto;
+}
+
+.register-table-wrap table {
+    border-collapse: collapse;
+    font-family: 'Courier New', monospace;
+    font-size: 11px;
+    width: 100%;
+}
+
+.register-table-wrap th,
+.register-table-wrap td {
+    border: 1px solid #0f3460;
+    padding: 3px 5px;
+    text-align: center;
+    white-space: nowrap;
+}
+
+.register-table-wrap th {
+    background: #0f3460;
+    color: #e0e0e0;
+    position: sticky;
+    top: 0;
+    z-index: 1;
+}
+
+.register-table-wrap td {
+    color: #7fdbca;
+}
+
+.register-table-wrap tr:hover td {
+    background: rgba(233, 69, 96, 0.1);
+}

@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лаб. 2 — Потоковое шифрование LFSR</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Потоковое шифрование LFSR</h1>
+        <p class="subtitle">Вариант 11 | Многочлен: x<sup>33</sup> + x<sup>13</sup> + 1 | Регистр: 33 бита</p>
+
+        <div id="status" class="status"></div>
+
+        <div class="controls">
+            <div class="control-row">
+                <label for="initialState">Начальное состояние (33 бита):</label>
+                <input type="text" id="initialState" maxlength="33"
+                       placeholder="Например: 111111111111111111111111111111111">
+                <span id="stateCounter" class="state-counter">0/33</span>
+            </div>
+
+            <div class="control-row">
+                <label>Файл:</label>
+                <label for="fileInput" class="file-label">Выбрать файл</label>
+                <input type="file" id="fileInput">
+                <span id="fileInfo" class="file-info">Файл не выбран</span>
+            </div>
+
+            <div class="control-row">
+                <label>Действия:</label>
+                <div class="btn-group">
+                    <button class="btn-encrypt" id="btnEncrypt" disabled>Зашифровать</button>
+                    <button class="btn-decrypt" id="btnDecrypt" disabled>Расшифровать</button>
+                    <button class="btn-download" id="btnDownload" disabled>Скачать результат</button>
+                    <button class="btn-csv" id="btnCSV" disabled>Экспорт таблицы (CSV)</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="panels">
+            <div class="panel">
+                <h3>Исходный файл (бинарный вид)</h3>
+                <div class="binary-view" id="originalBinary"></div>
+            </div>
+            <div class="panel">
+                <h3>Результат (бинарный вид)</h3>
+                <div class="binary-view" id="resultBinary"></div>
+            </div>
+            <div class="panel full-width">
+                <h3>Сгенерированный ключ</h3>
+                <div class="binary-view" id="keyBinary"></div>
+            </div>
+            <div class="panel full-width">
+                <h3>Таблица работы регистра по тактам</h3>
+                <div class="register-table-wrap" id="registerTable"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="lfsr.js"></script>
+    <script src="cipher.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
