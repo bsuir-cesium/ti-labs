@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лаб. 3 — Криптосистема Рабина</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Криптосистема Рабина</h1>
+        <p class="subtitle">Вариант 3 | Шифрование файла произвольного содержимого</p>
+
+        <div id="status" class="status"></div>
+
+        <div class="controls">
+            <div class="control-row">
+                <label for="inputP">Параметр p (простое, ≡3 mod 4):</label>
+                <input type="text" id="inputP" placeholder="например, 5003">
+                <span id="pHint" class="param-hint"></span>
+            </div>
+            <div class="control-row">
+                <label for="inputQ">Параметр q (простое, ≡3 mod 4):</label>
+                <input type="text" id="inputQ" placeholder="например, 5227">
+                <span id="qHint" class="param-hint"></span>
+            </div>
+            <div class="control-row">
+                <label for="inputB">Параметр b (натуральное):</label>
+                <input type="text" id="inputB" placeholder="например, 1234">
+                <span id="bHint" class="param-hint"></span>
+            </div>
+            <div class="control-row">
+                <label>Файл:</label>
+                <label for="fileInput" class="file-label">Выбрать файл</label>
+                <input type="file" id="fileInput">
+                <span id="fileInfo" class="file-info">Файл не выбран</span>
+            </div>
+
+            <div class="control-row">
+                <label>Действия:</label>
+                <div class="btn-group">
+                    <button class="btn-encrypt" id="btnEncrypt" disabled>Зашифровать</button>
+                    <button class="btn-decrypt" id="btnDecrypt" disabled>Расшифровать</button>
+                    <button class="btn-download" id="btnDownload" disabled>Скачать результат</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="errorBox" class="error-box"></div>
+
+        <div class="panels">
+            <div class="panel">
+                <h3>Исходный файл (байты, 10-я СС)</h3>
+                <div class="binary-view" id="originalView"></div>
+            </div>
+            <div class="panel">
+                <h3>Шифротекст (числа, 10-я СС)</h3>
+                <div class="binary-view" id="cipherView"></div>
+            </div>
+            <div class="panel full-width">
+                <h3>Результат расшифровки (байты, 10-я СС)</h3>
+                <div class="binary-view" id="resultView"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="algorithms.js"></script>
+    <script src="rabin.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
